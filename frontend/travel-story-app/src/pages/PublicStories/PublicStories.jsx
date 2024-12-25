@@ -3,15 +3,20 @@ import Navbar from "../../components/Navbar";
 import axiosInstance from "../../utils/axiosInstance";
 import TravelStoryCard from "../../components/Cards/TravelStoryCard";
 import EmptyCard from "../../components/Cards/EmptyCard";
-import moment from "moment";
 import FilterInfoTitle from "../../components/Cards/FilterInfoTitle";
 import { getEmptyCardImg, getEmptyCardMessage } from "../../utils/helper";
+import Modal from "react-modal";
+import ViewTravelStory from "../Home/ViewTravelStory"; // Assuming this component handles displaying story details.
 
 const PublicStories = () => {
   const [allStories, setAllStories] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("");
-  const [dateRange, setDateRange] = useState({ from: null, to: null });
+
+  const [openViewModal, setOpenViewModal] = useState({
+    isShown: false,
+    data: null,
+  });
 
   // Fetch all public stories
   const getAllPublicStories = async () => {
@@ -45,33 +50,7 @@ const PublicStories = () => {
     getAllPublicStories();
   };
 
-  // Filter stories by date
-//   const filterStoriesByDate = async (day) => {
-//     try {
-//       const startDate = day.from ? moment(day.from).valueOf() : null;
-//       const endDate = day.to ? moment(day.to).valueOf() : null;
-
-//       if (startDate && endDate) {
-//         const response = await axiosInstance.get("/public-stories/filter", {
-//           params: { startDate, endDate },
-//         });
-//         if (response.data && response.data.stories) {
-//           setFilterType("date");
-//           setAllStories(response.data.stories);
-//         }
-//       }
-//     } catch (error) {
-//       console.log("An unexpected error occurred. Please try again.");
-//     }
-//   };
-
-//   const handleDayClick = (day) => {
-//     setDateRange(day);
-//     filterStoriesByDate(day);
-//   };
-
   const resetFilter = () => {
-    setDateRange({ from: null, to: null });
     setFilterType("");
     getAllPublicStories();
   };
@@ -79,6 +58,10 @@ const PublicStories = () => {
   useEffect(() => {
     getAllPublicStories();
   }, []);
+
+  const handleViewStory = (data) => {
+    setOpenViewModal({ isShown: true, data });
+  };
 
   return (
     <>
@@ -92,7 +75,6 @@ const PublicStories = () => {
       <div className="container mx-auto py-10">
         <FilterInfoTitle
           filterType={filterType}
-          filterDates={dateRange}
           onClear={resetFilter}
         />
 
@@ -108,6 +90,7 @@ const PublicStories = () => {
                     story={item.story}
                     date={item.visitedDate}
                     visitedLocation={item.visitedLocation}
+                    onClick={() => handleViewStory(item)}
                   />
                 ))}
               </div>
@@ -118,22 +101,31 @@ const PublicStories = () => {
               />
             )}
           </div>
-
-          {/* <div className="w-[350px]">
-            <div className="bg-white border border-slate-200 shadow-lg shadow-slate-200/60 rounded-lg">
-              <div className="p-3">
-                <DayPicker
-                  captionLayout="dropdown-buttons"
-                  mode="range"
-                  selected={dateRange}
-                  onSelect={handleDayClick}
-                  pagedNavigation
-                />
-              </div>
-            </div>
-          </div> */}
         </div>
       </div>
+
+      {/* Modal to View Travel Story */}
+      <Modal
+        isOpen={openViewModal.isShown}
+        onRequestClose={() => setOpenViewModal((prevState) => ({ ...prevState, isShown: false }))}
+
+        // onRequestClose={() => setOpenViewModal({ isShown: false, data: null })}
+        style={{
+          overlay: {
+            backgroundColor: "rgba(0,0,0,0.2)",
+            zIndex: 999,
+          },
+        }}
+        appElement={document.getElementById("root")}
+        className="model-box"
+      >
+        <ViewTravelStory
+          storyInfo={openViewModal.data || null}
+          // onClose={() => setOpenViewModal({ isShown: false, data: null })}
+          onClose={() => setOpenViewModal((prevState) => ({ ...prevState, isShown: false }))}
+
+        />
+      </Modal>
     </>
   );
 };

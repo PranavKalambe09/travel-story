@@ -16,7 +16,7 @@ const ViewTravelStory = ({
         <div>
           <div className="flex items-center gap-3 bg-cyan-50/50 p-2 rounded-l-lg">
             <button className="btn-small" onClick={onEditClick}>
-              <MdUpdate className="text-lg" /> UPDATE STORY
+              <MdUpdate className="text-lg" /> Update Story
             </button>
 
             <button className="btn-small btn-delete" onClick={onDeleteClick}>
